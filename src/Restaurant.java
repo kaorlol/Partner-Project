@@ -1,4 +1,3 @@
-// Ill add a uid system to the employees tmr so the database can have multiple employees with the same name
 public class Restaurant {
 	public static void main(String[] args) {
 		Employees e = new Employees();
