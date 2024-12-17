@@ -1,61 +1,74 @@
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Employees {
+	// Was thinking of using float but it lacks precision for small decimal values
+	// for example, 7.33 would be 7.3299999237060546875 which is not ideal for pay
 	private static final double MINIMUM_WAGE = 14.65;
 	private static final double MINIMUM_TIP_WAGE = 7.33;
 	private static final double OVERTIME_RATE = 1.5;
 
 	// Using class instead of something like record because school computer is on a
 	// lower version of Java
-	public static class JobPay {
+	static class Employee {
+		private String name;
 		private Job job;
-		private double pay;
+		private double hourlyWage;
 
-		public JobPay(Job job, double pay) {
+		public Employee(String name, Job job, double hourlyWage) {
+			this.name = name;
 			this.job = job;
-			this.pay = pay;
+			this.hourlyWage = hourlyWage;
+		}
+
+		public String getName() {
+			return name;
 		}
 
 		public Job getJob() {
 			return job;
 		}
 
-		public double getPay() {
-			return pay;
+		public double getHourlyWage() {
+			return hourlyWage;
 		}
 
 		public void setJob(Job job) {
 			this.job = job;
 		}
 
-		public void setPay(double pay) {
-			this.pay = pay;
+		public void setHourlyWage(double hourlyWage) {
+			this.hourlyWage = hourlyWage;
 		}
 	}
 
 	// Using enum to prevent hard-coding strings
-	public enum Job {
+	enum Job {
 		Manager,
 		Cook,
 		Cashier
 	}
 
+	// Was thinking of using UUID but AtomicInteger is more straightforward
+	private static final AtomicInteger UID_COUNTER = new AtomicInteger();
 	// Fail-safe and doesn't allow null keys or values
-	private Dictionary<String, JobPay> EmployeeDatabase = new Hashtable<>();
+	private final Dictionary<Integer, Employee> EMPLOYEES = new Hashtable<>();
 
-	public void addEmployee(String name, Job job, double pay) {
-		if (pay < (job == Job.Cashier ? MINIMUM_TIP_WAGE : MINIMUM_WAGE)) {
-			System.err.println("Invalid pay for " + name);
-			return;
+	public int addEmployee(String name, Job job, double hourlyWage) {
+		if (hourlyWage < (job == Job.Cashier ? MINIMUM_TIP_WAGE : MINIMUM_WAGE)) {
+			// System.err.println("Invalid hourlyWage for " + name);
+			// return -1;
+			throw new IllegalArgumentException(String.format("Invalid hourly wage for %s", name));
 		}
 
+		// You can't have multiple managers 🙄
 		if (job == Job.Manager) {
-			Enumeration<String> keys = EmployeeDatabase.keys();
+			Enumeration<Integer> keys = EMPLOYEES.keys();
 			while (keys.hasMoreElements()) {
-				String key = keys.nextElement();
-				JobPay jp = EmployeeDatabase.get(key);
+				Integer key = keys.nextElement();
+				Employee jp = EMPLOYEES.get(key);
 				if (jp.getJob() == Job.Manager) {
 					fireEmployee(key);
 					break;
@@ -63,50 +76,55 @@ public class Employees {
 			}
 		}
 
-		EmployeeDatabase.put(name, new JobPay(job, pay));
+		int uid = UID_COUNTER.incrementAndGet();
+		EMPLOYEES.put(uid, new Employee(name, job, hourlyWage));
+		return uid;
 	}
 
-	public void addEmployee(String name, Job job) {
-		addEmployee(name, job, job == Job.Cashier ? MINIMUM_TIP_WAGE : MINIMUM_WAGE);
+	public int addEmployee(String name, Job job) {
+		return addEmployee(name, job, job == Job.Cashier ? MINIMUM_TIP_WAGE : MINIMUM_WAGE);
 	}
 
-	public void fireEmployee(String name) {
-		EmployeeDatabase.remove(name);
+	public void fireEmployee(int uid) {
+		String name = EMPLOYEES.get(uid).getName();
+		EMPLOYEES.remove(uid);
 		System.out.println("Fired: " + name);
 	}
 
-	public double calculatePay(String name, double hours) {
-		JobPay jp = EmployeeDatabase.get(name);
+	public double calculatePay(int uid, double hours) {
+		Employee jp = EMPLOYEES.get(uid);
 		if (jp == null) {
-			System.err.println("Employee not found: " + name);
-			return 0;
+			// System.err.println("Employee uid not found: " + uid);
+			// return 0;
+			throw new IllegalArgumentException(String.format("Employee with uid %d not found", uid));
 		}
 
-		double pay = jp.getPay();
-		// Gets the number of hours worked over 40
+		double hourlyWage = jp.getHourlyWage();
 		double overtime = Math.max(hours - 40.0, 0.0);
-		// pay * (hours - overtime) -> pay for regular hours
-		// pay * OVERTIME_RATE * overtime -> pay for overtime hours
-		return pay * (hours - overtime) + pay * OVERTIME_RATE * overtime;
+		// hourlyWage * (hours - overtime) -> pay for regular hours
+		// hourlyWage * OVERTIME_RATE * overtime -> pay for overtime hours
+		return hourlyWage * (hours - overtime) + hourlyWage * OVERTIME_RATE * overtime;
 	}
 
-	public void giveRaise(String name, double raise) {
-		JobPay jp = EmployeeDatabase.get(name);
+	public void giveRaise(int uid, double raise) {
+		Employee jp = EMPLOYEES.get(uid);
 		if (jp == null) {
-			System.err.println("Employee not found: " + name);
-			return;
+			// System.err.println("Employee uid not found: " + uid);
+			// return;
+			throw new IllegalArgumentException(String.format("Employee with uid %d not found", uid));
 		}
-		jp.setPay(jp.getPay() + raise);
+		jp.setHourlyWage(jp.getHourlyWage() + raise);
 	}
 
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		Enumeration<String> keys = EmployeeDatabase.keys();
+		String result = "";
+		Enumeration<Integer> keys = EMPLOYEES.keys();
 		while (keys.hasMoreElements()) {
-			String key = keys.nextElement();
-			JobPay jp = EmployeeDatabase.get(key);
-			sb.append(key + " is a " + jp.getJob() + " and makes $" + jp.getPay() + " per hour\n");
+			Integer key = keys.nextElement();
+			Employee jp = EMPLOYEES.get(key);
+			result += String.format("%s (uid: %d) is a %s and makes $%.2f per hour\n", jp.getName(), key, jp.getJob(),
+					jp.getHourlyWage());
 		}
-		return sb.toString();
+		return result;
 	}
 }
