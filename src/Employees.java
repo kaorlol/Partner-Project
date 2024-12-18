@@ -49,29 +49,57 @@ public class Employees {
 
 	private static final Map<String, Double> FOOD = new HashMap<>();
 
+	private int UID_COUNTER = 0;
+	private static final Map<Integer, Employee> EMPLOYEES = new HashMap<>();
 	// Using enum to prevent hard-coding strings
 	enum Job {
 		Manager,
 		Cook,
 		Cashier;
 
+		public void fireEmployee(int uid) {
+			String name = EMPLOYEES.get(uid).getName();
+			EMPLOYEES.remove(uid);
+			System.out.println("Fired: " + name);
+		}
+
 		public double order(String o) {
 			FOOD.put("burger", 8.5);
+			FOOD.put("fries", 3.5);
+			FOOD.put("wings", 11.0);
 
+			double change = 0;
+			
 			switch (o.toLowerCase()) {
 				case "burger":
-					System.out.println("User ordered a: " + o);
+					cook(o);
+					change += FOOD.get(o);
+					break;
+				case "fries":
+					cook(o);
+					change += FOOD.get(o);
+					break;
+				case "wings":
+					cook(o);
+					change += FOOD.get(o);
 					break;
 				default:
 					break;
 			}
 
-			return 10.0;
+			return change;
 		}
+
+		private void cook(String food)
+		{
+			System.out.println("Cooked " + food);
+			
+
+		}
+
 	}
 
-	private int UID_COUNTER = 0;
-	private final Map<Integer, Employee> EMPLOYEES = new HashMap<>();
+	
 
 	public Employee addEmployee(String name, Job job, double hourlyWage) {
 		if (hourlyWage < (job == Job.Cashier ? MINIMUM_TIP_WAGE : MINIMUM_WAGE)) {
@@ -84,7 +112,7 @@ public class Employees {
 		if (job == Job.Manager) {
 			for (Map.Entry<Integer, Employee> entry : EMPLOYEES.entrySet()) {
 				if (entry.getValue().getJob() == Job.Manager) {
-					fireEmployee(entry.getKey());
+					job.fireEmployee(entry.getKey());
 					break;
 				}
 			}
@@ -100,11 +128,7 @@ public class Employees {
 		return addEmployee(name, job, job == Job.Cashier ? MINIMUM_TIP_WAGE : MINIMUM_WAGE);
 	}
 
-	public void fireEmployee(int uid) {
-		String name = EMPLOYEES.get(uid).getName();
-		EMPLOYEES.remove(uid);
-		System.out.println("Fired: " + name);
-	}
+	
 
 	public double calculatePay(int uid, double hours) {
 		Employee jp = EMPLOYEES.get(uid);
