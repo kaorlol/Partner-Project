@@ -47,13 +47,24 @@ public class Employees {
 		}
 	}
 
+	private static final Map<String, Double> FOOD = new HashMap<>();
+
 	// Using enum to prevent hard-coding strings
 	enum Job {
 		Manager,
 		Cook,
 		Cashier;
 
-		public double order() {
+		public double order(String o) {
+			FOOD.put("burger", 8.5);
+
+			switch (o.toLowerCase()) {
+				case "burger":
+					System.out.println("User ordered a: " + o);
+					break;
+				default:
+					break;
+			}
 
 			return 10.0;
 		}

@@ -9,7 +9,7 @@ public class Restaurant {
 		e.fireEmployee(trent.getUid());
 		e.giveRaise(brendan.getUid(), 2.77);
 
-		double a = will.getJob().order();
+		double a = will.getJob().order("burger");
 		System.out.println(a);
 
 		System.out.println("Jacoby's pay: $" + e.calculatePay(jacoby.getUid(), 50.0));
