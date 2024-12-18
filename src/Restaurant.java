@@ -19,7 +19,7 @@ public class Restaurant {
 
 		System.out.print("Please state your order: ");
 		Scanner sc = new Scanner(System.in);
-		String userOrder = sc.nextLine();
+		String userOrder = sc.nextLine().trim();
 		System.out.println("Is this your order: " + userOrder);
 		double a = will.getJob().order(userOrder);
 		System.out.println(a);
