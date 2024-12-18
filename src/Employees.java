@@ -10,14 +10,20 @@ public class Employees {
 	// Using class instead of something like record because school computer is on a
 	// lower version of Java
 	class Employee {
+		private int uid;
 		private String name;
 		private Job job;
 		private double hourlyWage;
 
-		public Employee(String name, Job job, double hourlyWage) {
+		public Employee(int uid, String name, Job job, double hourlyWage) {
+			this.uid = uid;
 			this.name = name;
 			this.job = job;
 			this.hourlyWage = hourlyWage;
+		}
+
+		public int getUid() {
+			return uid;
 		}
 
 		public String getName() {
@@ -45,13 +51,18 @@ public class Employees {
 	enum Job {
 		Manager,
 		Cook,
-		Cashier
+		Cashier;
+
+		public double order() {
+
+			return 10.0;
+		}
 	}
 
 	private int UID_COUNTER = 0;
 	private final Map<Integer, Employee> EMPLOYEES = new HashMap<>();
 
-	public int addEmployee(String name, Job job, double hourlyWage) {
+	public Employee addEmployee(String name, Job job, double hourlyWage) {
 		if (hourlyWage < (job == Job.Cashier ? MINIMUM_TIP_WAGE : MINIMUM_WAGE)) {
 			// System.err.println("Invalid hourlyWage for " + name);
 			// return -1;
@@ -69,11 +80,12 @@ public class Employees {
 		}
 
 		UID_COUNTER++;
-		EMPLOYEES.put(UID_COUNTER, new Employee(name, job, hourlyWage));
-		return UID_COUNTER;
+		Employee e = new Employee(UID_COUNTER, name, job, hourlyWage);
+		EMPLOYEES.put(UID_COUNTER, e);
+		return e;
 	}
 
-	public int addEmployee(String name, Job job) {
+	public Employee addEmployee(String name, Job job) {
 		return addEmployee(name, job, job == Job.Cashier ? MINIMUM_TIP_WAGE : MINIMUM_WAGE);
 	}
 
