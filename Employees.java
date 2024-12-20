@@ -1,4 +1,3 @@
-import java.util.*;
 
 public class Employees {
 	// Was thinking of using float but it lacks precision for small decimal values
@@ -45,17 +44,6 @@ public class Employees {
 		public void setHourlyWage(double hourlyWage) {
 			this.hourlyWage = hourlyWage;
 		}
-	}
-
-	private static final Map<String, Double> FOOD = new HashMap<>();
-
-	private int UID_COUNTER = 0;
-	private static final Map<Integer, Employee> EMPLOYEES = new HashMap<>();
-	// Using enum to prevent hard-coding strings
-	enum Job {
-		Manager,
-		Cook,
-		Cashier;
 
 		public void fireEmployee(int uid) {
 			String name = EMPLOYEES.get(uid).getName();
@@ -63,43 +51,45 @@ public class Employees {
 			System.out.println("Fired: " + name);
 		}
 
-		public double order(String o) {
-			FOOD.put("burger", 8.5);
-			FOOD.put("fries", 3.5);
-			FOOD.put("wings", 11.0);
-
+		public String order(String o) {
 			double change = 0;
-			
-			switch (o.toLowerCase()) {
+
+			switch (o.toLowerCase().trim()) {
 				case "burger":
 					cook(o);
-					change += FOOD.get(o);
+					change += 8.5;
 					break;
 				case "fries":
 					cook(o);
-					change += FOOD.get(o);
+					change += 6.4;
 					break;
 				case "wings":
 					cook(o);
-					change += FOOD.get(o);
+					change += 11.3;
 					break;
 				default:
 					break;
 			}
 
-			return change;
+			return String.format("Benny's Burger, cost: %s, %s (%s), %s", change, this.getName(),
+					this.getJob(), LocalDate.now());
 		}
 
-		private void cook(String food)
-		{
+		private void cook(String food) {
 			System.out.println("Cooked " + food);
-			
 
 		}
-
 	}
 
-	
+	private int UID_COUNTER = 0;
+	private static final Map<Integer, Employee> EMPLOYEES = new HashMap<>();
+
+	// Using enum to prevent hard-coding strings
+	enum Job {
+		Manager,
+		Cook,
+		Cashier;
+	}
 
 	public Employee addEmployee(String name, Job job, double hourlyWage) {
 		if (hourlyWage < (job == Job.Cashier ? MINIMUM_TIP_WAGE : MINIMUM_WAGE)) {
@@ -112,7 +102,7 @@ public class Employees {
 		if (job == Job.Manager) {
 			for (Map.Entry<Integer, Employee> entry : EMPLOYEES.entrySet()) {
 				if (entry.getValue().getJob() == Job.Manager) {
-					job.fireEmployee(entry.getKey());
+					entry.getValue().fireEmployee(entry.getKey());
 					break;
 				}
 			}
@@ -127,8 +117,6 @@ public class Employees {
 	public Employee addEmployee(String name, Job job) {
 		return addEmployee(name, job, job == Job.Cashier ? MINIMUM_TIP_WAGE : MINIMUM_WAGE);
 	}
-
-	
 
 	public double calculatePay(int uid, double hours) {
 		Employee jp = EMPLOYEES.get(uid);
