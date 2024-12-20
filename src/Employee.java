@@ -53,6 +53,12 @@ public class Employee {
 		System.out.println("Fired: " + name);
 	}
 
+	/**
+	 * This provides information about whether the food is cooked and price, it also corrcts the user input from any upper case order to 
+	 * lower case for easier processing. 
+	 * @param o
+	 * @return
+	 */
 	public String order(String o) {
 		double change = 0;
 

@@ -1,8 +1,16 @@
+/*
+This is a driver class for Employee.java
+Author: Jacoby and Steven
+ */
+
 import java.util.Scanner;
 
 public class Restaurant {
 	public static void main(String[] args) {
-		Employee jacoby = new Employee("Jacoby", Employee.Job.Manager, 20.0);
+		/**
+		* Calling on Employee class and creating new employee 
+	 	*/
+		Employee jacoby = new Employee("Jacoby", Employee.Job.Manager, 20.0); 
 		Employee will = new Employee("Will", Employee.Job.Cook);
 		Employee casey = new Employee("Casey", Employee.Job.Cashier);
 		Employee trent = new Employee("Trent", Employee.Job.Cashier, 10.0);
@@ -16,7 +24,8 @@ public class Restaurant {
 
 		System.out.println(casey.toString());
 
-		System.out.print("Please state your order: ");
+		
+		System.out.print("Please state your order: "); //User input
 		Scanner sc = new Scanner(System.in);
 		String userOrder = sc.nextLine();
 		String a = will.order(userOrder);
